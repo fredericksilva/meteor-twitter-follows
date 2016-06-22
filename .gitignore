@@ -1,0 +1,6 @@
+.meteor/
+node_modules/
+packages/
+settings.json
+client/lib/semantic-ui/themes/
+npm-debug.log

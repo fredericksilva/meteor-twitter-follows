@@ -1,0 +1,112 @@
+<head>
+    <title>Who'snotfollowing</title>
+</head>
+
+<body>
+    <div class="ui fixed menu">
+        <div class="ui container">
+            <div class="ui borderless header item">Who's<em>not</em>following</div>
+            <div class="ui right floated borderless header item">
+                {{> loginButtons}}
+            </div>
+        </div>
+    </div>
+    <div class="ui main grid container" style="margin-top:40px">
+        {{#if currentUser}}
+            <div class="four wide column">
+                {{> followers}}
+            </div>
+
+            <div class="four wide column">
+                {{> following}}
+            </div>
+        {{else}}
+            <div class="sixteen wide column">
+                {{> loggedOut}}
+            </div>
+        {{/if}}
+    </div>
+</body>
+
+<template name="loggedOut">
+    <div class="ui raised segment">
+        <h2>Please Sign In With Twitter</h2>
+        <p>You must sign in with your twitter account to be able to check out of the accounts that you are following how many are actually following you back</p>
+    </div>
+</template>
+
+<template name="followers">
+    <div class="ui segments">
+        <h5 class="ui attached top header">
+            Recent Followers
+            {{#if numberOfFollowers}}
+                (Total {{numberOfFollowers}})
+            {{/if}}
+        </h5>
+        <div class="ui attached segment">
+            {{# if followers}}
+                <div class="ui relaxed divided list">
+                    {{#each followers}}
+                        <div class="item">
+                            <div class="image">
+                                <img src="{{profile_image_url}}"/>
+                            </div>
+                            <div class="content">
+                                <div class="header">{{name}}</div>
+                                <div class="description">
+                                    {{#if following}}
+                                        Following
+                                    {{else}}
+                                        {{#if follow_request_sent}}
+                                            Follow request sent
+                                        {{else}}
+                                            Not following
+                                        {{/if}}
+                                    {{/if}}
+                                </div>
+                            </div>
+                        </div>
+                    {{/each}}
+                </div>
+            {{else}}
+                <div class="ui active centered inline loader"></div>
+            {{/if}}
+        </div>
+    </div>
+</template>
+
+<template name="following">
+    <div class="ui segments">
+        <h5 class="ui attached top header">
+            Recent Follows
+            {{#if numberFollowing}}
+                (Total {{numberFollowing}})
+            {{/if}}
+        </h5>
+        <div class="ui attached segment">
+            {{# if following}}
+                <div class="ui relaxed divided list">
+                    {{#each following}}
+                        <div class="item">
+                            <div class="image">
+                                <img src="{{profile_image_url}}"/>
+                            </div>
+                            <div class="content">
+                                <div class="header">{{name}}</div>
+                                <div class="description">
+                                    {{#if followed_by}}
+                                        Following back
+                                    {{else}}
+                                        Not following back
+                                    {{/if}}
+                                </div>
+                            </div>
+                        </div>
+                    {{/each}}
+                </div>
+            {{else}}
+                <div class="ui active centered inline loader"></div>
+            {{/if}}
+        </div>
+    </div>
+</template>
