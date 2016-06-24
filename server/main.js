@@ -3,10 +3,10 @@ import { Session } from 'meteor/session';
 
 var Twit;
 var Future;
+var userTwitterConnections = {};
 
 Meteor.startup(() => {
     // code to run on server at startup
-
     Twit = Meteor.npmRequire('twit');
     Future = Npm.require('fibers/future');
 });
@@ -18,12 +18,18 @@ function twitter(api, parameters) {
     if (!Meteor.user()) {
         return null;
     }
-    var T = new Twit({
-        consumer_key: Meteor.settings.twitter.api.key,
-        consumer_secret: Meteor.settings.twitter.api.secret,
-        access_token: Meteor.user().services.twitter.accessToken,
-        access_token_secret: Meteor.user().services.twitter.accessTokenSecret
-    });
+    var T = userTwitterConnections[Meteor.userId()];
+    if (!T) {
+        var T = new Twit({
+            consumer_key: Meteor.settings.twitter.api.key,
+            consumer_secret: Meteor.settings.twitter.api.secret,
+            access_token: Meteor.user().services.twitter.accessToken,
+            access_token_secret: Meteor.user().services.twitter.accessTokenSecret
+        });
+        // These connections will last forever.
+        // TODO: move these connection to a session variable
+        userTwitterConnections[Meteor.userId()] = T;
+    }
     var future = new Future();
     T.get(api, parameters, function(error, data, response) {
         if (error) {
@@ -36,20 +42,28 @@ function twitter(api, parameters) {
 }
 
 Meteor.methods({
-    getUser: function() {
-        return Meteor.user();
-    },
-    getTwitterUser: function() {
+    /**
+     * Get current user's twitter profile details
+     */
+    'twitter.getCurrentUser'() {
         if (!Meteor.user()) {
             return null;
         }
         return twitter('users/show', { user_id: Meteor.user().services.twitter.id });
     },
-    getFollowers: function(number = 5) {
+
+    /**
+     * Get the details of the most resent followers of the current user
+     */
+    'twitter.getFollowers'(number = 5) {
         const followers = twitter('followers/list', { count: number });
         return followers.users;
     },
-    getFollowing: function(number = 5) {
+
+    /**
+     * Get the details of the most resent accounts the current user is following
+     */
+    'twitter.getFollowing'(number = 5) {
         // Get list of accounts the user is following
         const following = twitter('friends/list', { count: number });
         if (!following) {
@@ -84,5 +98,42 @@ Meteor.methods({
             }
         }
         return users;
+    },
+
+    /**
+     * Get a count of how many accounts that the current user is following are following them back
+     */
+    'twitter.getNotFollowingCount'() {
+        // Get all the IDs of users the current user is following
+        let cursor = -1;
+        let followingIds = new Set();
+        do {
+            const result = twitter('friends/ids', {
+                user_id: Meteor.user().services.twitter.id,
+                count: 5000,
+                cursor: cursor
+            });
+            followingIds = new Set([...followingIds, ...result.ids])
+            cursor = result.next_cursor;
+        } while (cursor > 0);
+
+        // Get all the IDs of users that are following the current user
+        cursor = -1;
+        let followerIds = new Set();
+        do {
+            const result = twitter('followers/ids', {
+                user_id: Meteor.user().services.twitter.id,
+                count: 5000,
+                cursor: cursor
+            });
+            followerIds = new Set([...followerIds, ...result.ids])
+            cursor = result.next_cursor;
+        } while (cursor > 0);
+
+        // Get the intersection of all the users that are following the current user back
+        let intersection = new Set([...followingIds].filter(id => followerIds.has(id)));
+
+        // Return the difference between the number of users the current user is following and the number that are following them back
+        return followingIds.size - intersection.size;
     }
 });

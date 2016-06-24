@@ -1,1 +1,4 @@
 /* CSS declarations go here */
+.following .label, .followers .label {
+    margin-top: 3px;
+}

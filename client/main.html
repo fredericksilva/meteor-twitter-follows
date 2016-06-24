@@ -17,6 +17,10 @@
                 {{> followers}}
             </div>
 
+            <div class="eight wide column">
+                {{> stats}}
+            </div>
+
             <div class="four wide column">
                 {{> following}}
             </div>
@@ -36,12 +40,9 @@
 </template>
 
 <template name="followers">
-    <div class="ui segments">
+    <div class="ui followers segments">
         <h5 class="ui attached top header">
             Recent Followers
-            {{#if numberOfFollowers}}
-                (Total {{numberOfFollowers}})
-            {{/if}}
         </h5>
         <div class="ui attached segment">
             {{# if followers}}
@@ -53,17 +54,15 @@
                             </div>
                             <div class="content">
                                 <div class="header">{{name}}</div>
-                                <div class="description">
-                                    {{#if following}}
-                                        Following
+                                {{#if following}}
+                                    <div class="ui green label">Following</div>
+                                {{else}}
+                                    {{#if follow_request_sent}}
+                                        <div class="ui yellow label">Follow request sent</div>
                                     {{else}}
-                                        {{#if follow_request_sent}}
-                                            Follow request sent
-                                        {{else}}
-                                            Not following
-                                        {{/if}}
+                                        <div class="ui label">Not following</div>
                                     {{/if}}
-                                </div>
+                                {{/if}}
                             </div>
                         </div>
                     {{/each}}
@@ -76,12 +75,9 @@
 </template>
 
 <template name="following">
-    <div class="ui segments">
+    <div class="ui following segments">
         <h5 class="ui attached top header">
             Recent Follows
-            {{#if numberFollowing}}
-                (Total {{numberFollowing}})
-            {{/if}}
         </h5>
         <div class="ui attached segment">
             {{# if following}}
@@ -93,16 +89,46 @@
                             </div>
                             <div class="content">
                                 <div class="header">{{name}}</div>
-                                <div class="description">
-                                    {{#if followed_by}}
-                                        Following back
-                                    {{else}}
-                                        Not following back
-                                    {{/if}}
-                                </div>
+                                {{#if followed_by}}
+                                    <div class="ui green label">Following back</div>
+                                {{else}}
+                                    <div class="ui label">Not following back</div>
+                                {{/if}}
                             </div>
                         </div>
                     {{/each}}
+                </div>
+            {{else}}
+                <div class="ui active centered inline loader"></div>
+            {{/if}}
+        </div>
+    </div>
+</template>
+
+<template name="stats">
+    <div class="ui stats segments">
+        <h5 class="ui attached top header">
+            Your account statistics
+        </h5>
+        <div class="ui attached segment">
+            {{#if notFollowingCount}}
+                <div class="ui three statistics">
+                    {{#if numberFollowing}}
+                        <div class="ui statistic">
+                            <div class="label">FOLLOWING</div>
+                            <div class="value">{{numberFollowing}}</div>
+                        </div>
+                    {{/if}}
+                    {{#if numberOfFollowers}}
+                        <div class="ui statistic">
+                            <div class="label">FOLLOWERS</div>
+                            <div class="value">{{numberOfFollowers}}</div>
+                        </div>
+                    {{/if}}
+                    <div class="ui statistic">
+                        <div class="label">NOT FOLLOWING BACK</div>
+                        <div class="value">{{notFollowingCount}}</div>
+                    </div>
                 </div>
             {{else}}
                 <div class="ui active centered inline loader"></div>
