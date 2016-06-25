@@ -3,12 +3,6 @@ import { Session } from 'meteor/session';
 
 import './main.html';
 
-if (Meteor.user()) {
-    Meteor.call('twitter.getCurrentUser', function(error, result) {
-        Session.set('twitterUser', result);
-    });
-}
-
 Template.followers.onCreated(function followersOnCreated() {
     if (!Session.get('followers')) {
         Meteor.call('twitter.getFollowers', 20, function(error, result) {
@@ -26,6 +20,11 @@ Template.following.onCreated(function followingOnCreated() {
 });
 
 Template.stats.onCreated(function statsOnCreated() {
+    if (!Session.get('twitterUser')) {
+        Meteor.call('twitter.getCurrentUser', function(error, result) {
+            Session.set('twitterUser', result);
+        });
+    }
     if (!Session.get('notFollowingCount')) {
         Meteor.call('twitter.getNotFollowingCount', function(error, result) {
             Session.set('notFollowingCount', result);
