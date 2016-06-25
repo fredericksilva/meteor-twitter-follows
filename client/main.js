@@ -1,12 +1,13 @@
 import { Template } from 'meteor/templating';
-import { ReactiveVar } from 'meteor/reactive-var';
 import { Session } from 'meteor/session';
 
 import './main.html';
 
-Meteor.call('twitter.getCurrentUser', function(error, result) {
-    Session.set('twitterUser', result);
-});
+if (Meteor.user()) {
+    Meteor.call('twitter.getCurrentUser', function(error, result) {
+        Session.set('twitterUser', result);
+    });
+}
 
 Template.followers.onCreated(function followersOnCreated() {
     if (!Session.get('followers')) {
@@ -46,18 +47,31 @@ Template.following.helpers({
 
 Template.stats.helpers({
     notFollowingCount() {
-        return Session.get('notFollowingCount');
+        let count = Session.get('notFollowingCount');
+        if (count !== undefined) {
+            return formatStat(Session.get('notFollowingCount'));
+        }
     },
     numberOfFollowers() {
-        const TwitterUser = Session.get('twitterUser');
-        if (TwitterUser) {
-            return TwitterUser.followers_count;
+        let twitterUser = Session.get('twitterUser');
+        if (twitterUser) {
+            return formatStat(twitterUser.followers_count);
         }
     },
     numberFollowing() {
-        const TwitterUser = Session.get('twitterUser');
-        if (TwitterUser) {
-            return TwitterUser.friends_count;
+        let twitterUser = Session.get('twitterUser');
+        if (twitterUser) {
+            return formatStat(twitterUser.friends_count);
         }
     }
 });
+
+function formatStat(number) {
+    if (number < 100000) {
+        return number.toLocaleString('en-AU');
+    } else if (number < 1000000) {
+        return (number / 1000).toLocaleString('en-AU', { maximumSignificantDigits: 3 }) + 'k';
+    } else {
+        return (number / 1000000).toLocaleString('en-AU', { maximumSignificantDigits: 3 }) + 'm';
+    }
+}
