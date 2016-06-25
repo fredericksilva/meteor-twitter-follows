@@ -19,10 +19,9 @@ ecmascript              # Enable ECMAScript2015+ syntax in app code
 
 accounts-twitter
 accounts-ui
-meteorhacks:npm
 
 
-npm-container
 semantic:ui
 flemay:less-autoprefixer
 session
+meteorhacks:npm

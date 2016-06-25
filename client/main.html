@@ -13,15 +13,15 @@
     </div>
     <div class="ui main grid container" style="margin-top:40px">
         {{#if currentUser}}
-            <div class="four wide column">
-                {{> followers}}
-            </div>
-
-            <div class="eight wide column">
+            <div class="sixteen wide tablet column">
                 {{> stats}}
             </div>
 
-            <div class="four wide column">
+            <div class="eight wide tablet column">
+                {{> followers}}
+            </div>
+
+            <div class="eight wide tablet column">
                 {{> following}}
             </div>
         {{else}}
